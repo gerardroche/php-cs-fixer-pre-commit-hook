@@ -1,0 +1,74 @@
+#!/bin/sh
+#
+# Installation (global; used by all repositories)
+# -----------------------------------------------
+#
+# Create a Git hooks directory:
+#
+#   mkdir ~/.githooks
+#
+# Configure Git:
+#
+#   git config --global core.hooksPath ~/.githooks
+#
+# Move this file to:
+#
+#   ~/.githooks/pre-commit
+#
+# Make sure the file is executable:
+#
+#   chmod 744 ~/.githooks/pre-commit
+#
+# Done.
+#
+# Optionallly, take copies of the sample git hooks:
+#
+#   cp /usr/share/git-core/templates/hooks/*.sample ~/.githooks/
+
+set -e
+
+unset CDPATH
+
+IFS='
+'
+
+if test -f vendor/bin/php-cs-fixer; then
+    PHP_CS_FIXER_BIN=vendor/bin/php-cs-fixer
+    PHP_CS_FIXER_CONFIG=.php_cs.dist
+elif test -f laravel/vendor/bin/php-cs-fixer; then
+    PHP_CS_FIXER_BIN=laravel/vendor/bin/php-cs-fixer
+    PHP_CS_FIXER_CONFIG=laravel/.php_cs.dist
+else
+    PHP_CS_FIXER_BIN=
+    PHP_CS_FIXER_CONFIG=
+fi
+
+if test -n "$PHP_CS_FIXER_BIN"; then
+
+    CHANGED_FILES=$(git diff --staged --name-only --diff-filter=ACMRTUXB)
+
+    if ! echo "${CHANGED_FILES}" | grep -qE "^(\\.php_cs(\\.dist)?|composer\\.lock)$"; then
+        EXTRA_ARGS=$(printf -- '--path-mode=intersection\n--\n%s' "${CHANGED_FILES}")
+    else
+        EXTRA_ARGS=''
+    fi
+
+    PRE_COMMIT_PHP_CS_FIXER_VERBOSE="${PRE_COMMIT_PHP_CS_FIXER_VERBOSE-0}"
+
+    if test "x$PRE_COMMIT_PHP_CS_FIXER_VERBOSE" = "x1"; then
+        "$PHP_CS_FIXER_BIN" fix --config="$PHP_CS_FIXER_CONFIG"\
+            -v --dry-run --stop-on-violation --using-cache=no\
+            ${EXTRA_ARGS}
+    else
+        error_and_exit() {
+            echo >&2 "\033[0;33mCoding guidelines check failed."
+            echo >&2 "Run 'make cscheck' to check coding style"
+            echo >&2 " or 'make cs'      to fix coding style.\033[1;0m"
+            exit 1
+        }
+
+        "$PHP_CS_FIXER_BIN" fix --config="$PHP_CS_FIXER_CONFIG"\
+            -q --dry-run --stop-on-violation --using-cache=no\
+            ${EXTRA_ARGS} || error_and_exit
+    fi
+fi
