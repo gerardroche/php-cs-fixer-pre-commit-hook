@@ -4,7 +4,9 @@ A script to run [PHP Coding Standards Fixer](https://github.com/FriendsOfPhp/PHP
 
 PHP Coding Standards Fixer is run quietly to avoid unnecessary noise when
 committing code. If there are standards violations it is run again in verbose
-mode to provide more information about the violations.
+mode to provide more information about the violations and stop the commit.
+
+You can bypass the `pre-commit` with `git commit --no-verify`.
 
 A full check is done if the PHP Coding Standards configuration or the Composer
 dependencies lock file has changed, otherwise only changed files since the last
