@@ -57,12 +57,12 @@ run_php_cs_fixer() {
         fi
     done
 
-    # Only run the cs checks if a PHP Coding Standards fixer could be found.
+    # Only run if a PHP Coding Standards fixer could be found.
     if test -z "$php_cs_fixer_bin"; then
         return
     fi
 
-    # Only do a full check if the PHP Coding Standards condiguration or the
+    # Only do a full check if the PHP Coding Standards configuration or the
     # Composer dependencies lock file has changed, otherwise run a check only
     # for the files that have changed since the last commit.
     changed_files=$(git diff --staged --name-only --diff-filter=ACMRTUXB)
@@ -87,7 +87,7 @@ run_php_cs_fixer() {
         exit 1
     }
 
-    # PHP Coding Standards Fixer is run quitely. If there are errors it is run
+    # PHP Coding Standards Fixer is run quietly. If there are errors it is run
     # again in verbose mode to provide more information about which rules and
     # which files are failing the check.
     "$php_cs_fixer_bin" fix \
