@@ -1,26 +1,19 @@
-# Git Hooks
+# PHP Coding Standards Fixer Pre Commit Hook
 
 ## Installation
 
-This will install the hooks globally and will be used by all repositories.
+Create a Git hooks directory:
 
+    mkdir ~/.githooks
 
-Clone the repository to `~/.githooks`:
+Download the `pre-commit` hook to:
 
-    git clone https://github.com/gerardroche/githooks.git ~/.githooks
+    ~/.githooks/pre-commit
 
-Configure Git:
+Make sure the file is executable:
+
+    chmod 744 ~/.githooks/pre-commit
+
+Configure Git to use the hooks:
 
     git config --global core.hooksPath ~/.githooks
-
-Done.
-
-## Configuration
-
-For verbose messages when hooks are run set a system environment variable e.g. set it in your `~/.bashrc` file:
-
-    PRE_COMMIT_PHP_CS_FIXER_VERBOSE=1
-
-Or for less verbosity:
-
-    PRE_COMMIT_PHP_CS_FIXER_VERBOSE=0

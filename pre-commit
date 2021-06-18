@@ -1,17 +1,13 @@
 #!/bin/sh
 #
-# Installation (global; used by all repositories)
-# -----------------------------------------------
+# Installation
+# ------------
 #
 # Create a Git hooks directory:
 #
 #   mkdir ~/.githooks
 #
-# Configure Git:
-#
-#   git config --global core.hooksPath ~/.githooks
-#
-# Move this file to:
+# Download the `pre-commit` hook to:
 #
 #   ~/.githooks/pre-commit
 #
@@ -19,11 +15,9 @@
 #
 #   chmod 744 ~/.githooks/pre-commit
 #
-# Done.
+# Configure Git to use the hooks:
 #
-# Optionallly, take copies of the sample git hooks:
-#
-#   cp /usr/share/git-core/templates/hooks/*.sample ~/.githooks/
+#   git config --global core.hooksPath ~/.githooks
 
 set -e
 
@@ -32,43 +26,77 @@ unset CDPATH
 IFS='
 '
 
-if test -f vendor/bin/php-cs-fixer; then
-    PHP_CS_FIXER_BIN=vendor/bin/php-cs-fixer
-    PHP_CS_FIXER_CONFIG=.php_cs.dist
-elif test -f laravel/vendor/bin/php-cs-fixer; then
-    PHP_CS_FIXER_BIN=laravel/vendor/bin/php-cs-fixer
-    PHP_CS_FIXER_CONFIG=laravel/.php_cs.dist
-else
-    PHP_CS_FIXER_BIN=
-    PHP_CS_FIXER_CONFIG=
-fi
+run_php_cs_fixer() {
+    php_cs_fixer_bin=
 
-if test -n "$PHP_CS_FIXER_BIN"; then
+    # Find the PHP Coding Standards fixer script and configuration.
+    for base_dir in . ./laravel; do
+        php_cs_fixer_bin_candidate="$base_dir/vendor/bin/php-cs-fixer"
 
-    CHANGED_FILES=$(git diff --staged --name-only --diff-filter=ACMRTUXB)
+        if test -f "$php_cs_fixer_bin_candidate"; then
+            php_cs_fixer_bin="$php_cs_fixer_bin_candidate"
 
-    if ! echo "${CHANGED_FILES}" | grep -qE "^(\\.php_cs(\\.dist)?|composer\\.lock)$"; then
-        EXTRA_ARGS=$(printf -- '--path-mode=intersection\n--\n%s' "${CHANGED_FILES}")
-    else
-        EXTRA_ARGS=''
+            # Local override.
+            if test -f "$base_dir/.php-cs-fixer.php"; then
+                php_cs_fixer_config="$base_dir/.php-cs-fixer.php"
+
+            # Default.
+            elif test -f "$base_dir/.php-cs-fixer.dist.php"; then
+                php_cs_fixer_config="$base_dir/.php-cs-fixer.dist.php"
+
+            # Deprecated version 2 local override.
+            elif test -f "$base_dir/.php_cs"; then
+                php_cs_fixer_config="$base_dir/.php_cs"
+
+            # Deprecated version 2 default.
+            elif test -f "$base_dir/.php_cs.dist"; then
+                php_cs_fixer_config="$base_dir/.php_cs.dist"
+            fi
+
+            break
+        fi
+    done
+
+    # Only run the cs checks if a PHP Coding Standards fixer could be found.
+    if test -z "$php_cs_fixer_bin"; then
+        return
     fi
 
-    PRE_COMMIT_PHP_CS_FIXER_VERBOSE="${PRE_COMMIT_PHP_CS_FIXER_VERBOSE-0}"
+    # Only do a full check if the PHP Coding Standards condiguration or the
+    # Composer dependencies lock file has changed, otherwise run a check only
+    # for the files that have changed since the last commit.
+    changed_files=$(git diff --staged --name-only --diff-filter=ACMRTUXB)
 
-    if test "x$PRE_COMMIT_PHP_CS_FIXER_VERBOSE" = "x1"; then
-        "$PHP_CS_FIXER_BIN" fix --config="$PHP_CS_FIXER_CONFIG"\
-            -v --dry-run --stop-on-violation --using-cache=no\
-            ${EXTRA_ARGS}
+    if ! echo "${changed_files}" | grep -qE "^(laravel/)?(\\.php-cs-fixer(\\.dist)?|composer\\.lock)$"; then
+        extra_args=$(printf -- '--path-mode=intersection\n--\n%s' "${changed_files}")
     else
-        error_and_exit() {
-            echo >&2 "\033[0;33mCoding guidelines check failed."
-            echo >&2 "Run 'make cscheck' to check coding style"
-            echo >&2 " or 'make cs'      to fix coding style.\033[1;0m"
-            exit 1
-        }
-
-        "$PHP_CS_FIXER_BIN" fix --config="$PHP_CS_FIXER_CONFIG"\
-            -q --dry-run --stop-on-violation --using-cache=no\
-            ${EXTRA_ARGS} || error_and_exit
+        extra_args=''
     fi
-fi
+
+    rerun_with_details() {
+        echo >&2 "\033[0;33mCoding guidelines pre-commit check failed.\033[1;0m"
+        echo >&2 "\033[0;33mRunning check again in verbose mode ...\033[1;0m"
+
+        "$php_cs_fixer_bin" fix --config="$php_cs_fixer_config"\
+            -vvv \
+            --dry-run \
+            --stop-on-violation \
+            --using-cache=no \
+            ${extra_args}
+
+        exit 1
+    }
+
+    # PHP Coding Standards Fixer is run quitely. If there are errors it is run
+    # again in verbose mode to provide more information about which rules and
+    # which files are failing the check.
+    "$php_cs_fixer_bin" fix \
+        --config="$php_cs_fixer_config" \
+        -q \
+        --dry-run \
+        --stop-on-violation \
+        --using-cache=no \
+        ${extra_args} || rerun_with_details
+}
+
+run_php_cs_fixer
