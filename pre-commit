@@ -62,9 +62,9 @@ run_php_cs_fixer() {
         return
     fi
 
-    # Only do a full check if the PHP Coding Standards configuration or the
-    # Composer dependencies lock file has changed, otherwise run a check only
-    # for the files that have changed since the last commit.
+    # Only do a full check if the PHP Coding Standards fixer configuration file
+    # or the Composer dependencies lock file has changed, otherwise do a check
+    # only for files that have changed since the last commit.
     changed_files=$(git diff --staged --name-only --diff-filter=ACMRTUXB)
 
     if ! echo "${changed_files}" | grep -qE "^(laravel/)?(\\.php-cs-fixer(\\.dist)?|composer\\.lock)$"; then
@@ -79,6 +79,7 @@ run_php_cs_fixer() {
 
         "$php_cs_fixer_bin" fix --config="$php_cs_fixer_config"\
             -vvv \
+            --diff \
             --dry-run \
             --stop-on-violation \
             --using-cache=no \
