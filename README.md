@@ -1,4 +1,4 @@
-# PHP Coding Standards Fixer pre commit hook
+# PHP Coding Standards Fixer pre-commit hook
 
 A script to run [PHP Coding Standards Fixer](https://github.com/FriendsOfPhp/PHP-CS-Fixer) before committing code.
 

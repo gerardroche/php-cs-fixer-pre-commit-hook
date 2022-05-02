@@ -1,7 +1,6 @@
 #!/bin/sh
 #
-# Installation
-# ------------
+# == Installation
 #
 # Create a Git hooks directory:
 #
@@ -26,39 +25,23 @@ unset CDPATH
 IFS='
 '
 
-run_php_cs_fixer() {
-    php_cs_fixer_bin=
-
-    # Find the PHP Coding Standards fixer script and configuration.
-    for base_dir in . ./laravel; do
-        php_cs_fixer_bin_candidate="$base_dir/vendor/bin/php-cs-fixer"
-
-        if test -f "$php_cs_fixer_bin_candidate"; then
-            php_cs_fixer_bin="$php_cs_fixer_bin_candidate"
-
-            # Local override.
-            if test -f "$base_dir/.php-cs-fixer.php"; then
-                php_cs_fixer_config="$base_dir/.php-cs-fixer.php"
-
-            # Default.
-            elif test -f "$base_dir/.php-cs-fixer.dist.php"; then
-                php_cs_fixer_config="$base_dir/.php-cs-fixer.dist.php"
-
-            # Deprecated version 2 local override.
-            elif test -f "$base_dir/.php_cs"; then
-                php_cs_fixer_config="$base_dir/.php_cs"
-
-            # Deprecated version 2 default.
-            elif test -f "$base_dir/.php_cs.dist"; then
-                php_cs_fixer_config="$base_dir/.php_cs.dist"
-            fi
-
-            break
+php_cs_fixer_cfg() {
+    for candidate in .php-cs-fixer.php .php-cs-fixer.dist.php .php_cs .php_cs.dist; do
+        if test -f "$1/$candidate"; then
+            echo "$1/$candidate"
+            return
         fi
     done
+}
 
-    # Only run if a PHP Coding Standards fixer could be found.
-    if test -z "$php_cs_fixer_bin"; then
+run_php_cs_fixer() {
+    php_cs_fixer_bin=./vendor/bin/php-cs-fixer
+    if test ! -f "$php_cs_fixer_bin"; then
+        return
+    fi
+
+    php_cs_fixer_cfg="$(php_cs_fixer_cfg .)"
+    if test -z "$php_cs_fixer_cfg"; then
         return
     fi
 
@@ -77,7 +60,7 @@ run_php_cs_fixer() {
         echo >&2 "\033[0;33mCoding guidelines pre-commit check failed.\033[1;0m"
         echo >&2 "\033[0;33mRunning check again in verbose mode ...\033[1;0m"
 
-        "$php_cs_fixer_bin" fix --config="$php_cs_fixer_config"\
+        "$php_cs_fixer_bin" fix --config="$php_cs_fixer_cfg"\
             -vvv \
             --diff \
             --dry-run \
@@ -92,7 +75,7 @@ run_php_cs_fixer() {
     # again in verbose mode to provide more information about which rules and
     # which files are failing the check.
     "$php_cs_fixer_bin" fix \
-        --config="$php_cs_fixer_config" \
+        --config="$php_cs_fixer_cfg" \
         -q \
         --dry-run \
         --stop-on-violation \
