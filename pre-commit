@@ -1,22 +1,13 @@
 #!/bin/sh
 #
-# == Installation
+# PHP Coding Standards Fixer pre-commit hook
 #
-# Create a Git hooks directory:
+# https://github.com/gerardroche/php-cs-fixer-pre-commit-hook
 #
-#   mkdir ~/.githooks
-#
-# Download the `pre-commit` hook to:
-#
-#   ~/.githooks/pre-commit
-#
-# Make sure the file is executable:
-#
-#   chmod 744 ~/.githooks/pre-commit
-#
-# Configure Git to use the hooks:
-#
-#   git config --global core.hooksPath ~/.githooks
+# @see https://git-scm.com/docs/git-config#Documentation/git-config.txt-corehooksPath
+# @see https://git-scm.com/docs/githooks#_pre_commit)
+# @see https://github.com/PHP-CS-Fixer/PHP-CS-Fixer
+# @see https://cs.symfony.com
 
 set -e
 
@@ -25,10 +16,12 @@ unset CDPATH
 IFS='
 '
 
-php_cs_fixer_cfg() {
+get_config() {
+    # https://github.com/PHP-CS-Fixer/PHP-CS-Fixer/blob/master/doc/config.rst
+    # https://github.com/PHP-CS-Fixer/PHP-CS-Fixer/blob/master/UPGRADE-v3.md
     for candidate in .php-cs-fixer.php .php-cs-fixer.dist.php .php_cs .php_cs.dist; do
-        if test -f "$1/$candidate"; then
-            echo "$1/$candidate"
+        if test -f "./$candidate"; then
+            echo "./$candidate"
             return
         fi
     done
@@ -37,12 +30,12 @@ php_cs_fixer_cfg() {
 run_php_cs_fixer() {
     php_cs_fixer_bin=./vendor/bin/php-cs-fixer
     if test ! -f "$php_cs_fixer_bin"; then
-        return
+        return  # Noop, php-cs-fixer not found.
     fi
 
-    php_cs_fixer_cfg="$(php_cs_fixer_cfg .)"
-    if test -z "$php_cs_fixer_cfg"; then
-        return
+    config="$(get_config)"
+    if test -z "$config"; then
+        return  # Noop, php-cs-fixer config not found.
     fi
 
     # Only do a full check if the PHP Coding Standards fixer configuration file
@@ -56,11 +49,11 @@ run_php_cs_fixer() {
         extra_args=''
     fi
 
-    rerun_with_details() {
+    rerun_with_violation_details() {
         echo >&2 "\033[0;33mCoding guidelines pre-commit check failed.\033[1;0m"
         echo >&2 "\033[0;33mRunning check again in verbose mode ...\033[1;0m"
 
-        "$php_cs_fixer_bin" fix --config="$php_cs_fixer_cfg"\
+        "$php_cs_fixer_bin" fix --config="$config"\
             -vvv \
             --diff \
             --dry-run \
@@ -75,12 +68,12 @@ run_php_cs_fixer() {
     # again in verbose mode to provide more information about which rules and
     # which files are failing the check.
     "$php_cs_fixer_bin" fix \
-        --config="$php_cs_fixer_cfg" \
+        --config="$config" \
         -q \
         --dry-run \
         --stop-on-violation \
         --using-cache=no \
-        ${extra_args} || rerun_with_details
+        ${extra_args} || rerun_with_violation_details
 }
 
 run_php_cs_fixer
