@@ -37,3 +37,7 @@ Configure the Git [hooks path](https://git-scm.com/docs/git-config#Documentation
 ```sh
 git config --global core.hooksPath ~/.githooks
 ```
+
+## License
+
+Released under the [GPL-3.0-or-later License](LICENSE).
