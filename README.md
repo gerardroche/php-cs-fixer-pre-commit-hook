@@ -1,33 +1,39 @@
-# PHP Coding Standards Fixer pre-commit hook
+# PHP-CS-Fixer pre-commit hook
 
-A script to run [PHP Coding Standards Fixer](https://github.com/PHP-CS-Fixer/PHP-CS-Fixer) before committing code.
+A script that runs [PHP-CS-Fixer](https://github.com/PHP-CS-Fixer/PHP-CS-Fixer) before committing code.
 
-The fixer is run **quietly** to avoid unnecessary noise when committing code. If there are violations it is run again in verbose mode to provide more information about the violations in the commit.
+The fixer is **run quietly** to avoid any output. If there are violations it is run again in verbose mode to provide information about the violations.
 
-A full check is executed if the configuration or the Composer lock file has changed, otherwise only changed files since the last commit are checked.
+Only **changed files** since the the last commit are checked unless configuration files that might impact all files are changed, in which case a full check is done.
 
-This hook is invoked by git-commit, and [can be bypassed](https://git-scm.com/docs/githooks#_pre_commit) with the --no-verify option.
+The hook is invoked by `git commit`, and [can be bypassed](https://git-scm.com/docs/githooks#_pre_commit) with the `--no-verify` option.
 
-```
+```sh
 git commit --no-verify
 ```
 
 ## Installation
 
-Create a Git hooks directory:
+Create the hooks directory:
 
-    mkdir ~/.githooks
+```sh
+mkdir ~/.githooks
+```
 
-Download the `pre-commit` hook to:
+Download or copy the `pre-commit` script to:
 
-    ~/.githooks/pre-commit
+```sh
+~/.githooks/pre-commit
+```
 
 Make sure the file is executable:
 
-    chmod 744 ~/.githooks/pre-commit
+```sh
+chmod 744 ~/.githooks/pre-commit
+```
 
 Configure the Git [hooks path](https://git-scm.com/docs/git-config#Documentation/git-config.txt-corehooksPath):
 
-    git config --global core.hooksPath ~/.githooks
-
-Done!
+```sh
+git config --global core.hooksPath ~/.githooks
+```
