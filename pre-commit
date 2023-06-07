@@ -59,7 +59,7 @@ run_php_cs_fixer() {
     # only for files that have changed since the last commit.
     changed_files=$(git diff --staged --name-only --diff-filter=ACMRTUXB)
 
-    if ! echo "${changed_files}" | grep -qE "^(laravel/)?(\\.php-cs-fixer(\\.dist)?|composer\\.lock)$"; then
+    if ! echo "${changed_files}" | grep -qE "^(laravel/)?(\\.php-cs-fixer(\\.dist)?\\.php|composer\\.lock)$"; then
         extra_args=$(printf -- '--path-mode=intersection\n--\n%s' "${changed_files}")
     else
         extra_args=''
