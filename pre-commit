@@ -66,8 +66,8 @@ run_php_cs_fixer() {
     fi
 
     rerun_with_violation_details() {
-        echo >&2 "\033[0;33mCoding guidelines pre-commit check failed.\033[1;0m"
-        echo >&2 "\033[0;33mRunning check again in verbose mode ...\033[1;0m"
+        echo >&2 "\033[0;33mCoding guidelines pre-commit check failed.\033[0m"
+        echo >&2 "\033[0;33mRunning check again in verbose mode ...\033[0m"
 
         "$php_cs_fixer_bin" fix --config="$config"\
             -vvv \
