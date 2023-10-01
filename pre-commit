@@ -44,8 +44,15 @@ get_config() {
 }
 
 run_php_cs_fixer() {
-    php_cs_fixer_bin=./vendor/bin/php-cs-fixer
-    if test ! -f "$php_cs_fixer_bin"; then
+    php_cs_fixer_bin=
+    for candidate in tools/php-cs-fixer vendor/bin/php-cs-fixer; do
+        if test -f "$candidate"; then
+            php_cs_fixer_bin="$candidate"
+            break
+        fi
+    done
+
+    if test -z "$php_cs_fixer_bin"; then
         return  # Noop, php-cs-fixer not found.
     fi
 
