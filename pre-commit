@@ -72,6 +72,8 @@ run_php_cs_fixer() {
         extra_args=''
     fi
 
+    export XDEBUG_MODE="${XDEBUG_MODE:-off}"
+
     rerun_with_violation_details() {
         echo >&2 "\033[0;33mCoding guidelines pre-commit check failed.\033[0m"
         echo >&2 "\033[0;33mRunning check again in verbose mode ...\033[0m"
