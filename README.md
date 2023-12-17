@@ -12,6 +12,11 @@ This hook is invoked by `git commit`, and [can be bypassed](https://git-scm.com/
 git commit --no-verify
 ```
 
+**Environment variables**
+
+- `PHP_CS_FIXER_IGNORE_ENV=1`
+- `XDEBUG_MODE=off`
+
 ## Installation
 
 Create the hooks directory:

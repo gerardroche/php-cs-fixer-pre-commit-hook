@@ -72,6 +72,7 @@ run_php_cs_fixer() {
         extra_args=''
     fi
 
+    export PHP_CS_FIXER_IGNORE_ENV="${PHP_CS_FIXER_IGNORE_ENV:-1}"
     export XDEBUG_MODE="${XDEBUG_MODE:-off}"
 
     rerun_with_violation_details() {
