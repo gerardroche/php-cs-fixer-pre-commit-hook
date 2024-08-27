@@ -1,47 +1,49 @@
 # PHP-CS-Fixer Pre-Commit Hook
 
-This script runs [PHP-CS-Fixer](https://github.com/PHP-CS-Fixer/PHP-CS-Fixer) before committing code.
+Run [PHP-CS-Fixer](https://github.com/PHP-CS-Fixer/PHP-CS-Fixer) before committing code in a Git pre-commit hook.
 
-The fixer is **run quietly** to avoid any output. If there are violations, it is run again in verbose mode to provide information about the violations.
+The fixer runs quietly without making changes to your files, but will stop and print analysis upon first file that needs to be fixed. Only changed files since the last commit are checked, unless configuration files have changed, in which case the fixer runs a full check.
 
-Only **changed files** since the last commit are checked, unless configuration files that might impact all files are changed, in which case a full check is done.
-
-This hook is invoked by `git commit`, and [can be bypassed](https://git-scm.com/docs/githooks#_pre_commit) using the `--no-verify` option.
+The hook is invoked by `git commit`, and can be bypassed [using the `--no-verify`](https://git-scm.com/docs/githooks#_pre_commit) option:
 
 ```sh
 git commit --no-verify
 ```
 
-**Environment variables**
+## Environment variables
 
 - `PHP_CS_FIXER_IGNORE_ENV=1`
 - `XDEBUG_MODE=off`
 
 ## Installation
 
-Create the hooks directory:
+Create the hooks directory and set the [Git hooks path](https://git-scm.com/docs/git-config#Documentation/git-config.txt-corehooksPath).
 
 ```sh
-mkdir ~/.githooks
+mkdir ~/.githooks && git config --global core.hooksPath ~/.githooks
 ```
 
-Download or copy the `pre-commit` script to:
+Download, copy, or symlink the `pre-commit` script to `~/.githooks/pre-commit-php` and ensure the file is executable.
 
 ```sh
-~/.githooks/pre-commit
+chmod 744 ~/.githooks/pre-commit-php
 ```
 
-Ensure the file is executable:
+Create a pre-commit script that calls the php-cs-fixer pre-commit and any local pre-commit script if it exits.
 
 ```sh
-chmod 744 ~/.githooks/pre-commit
+#!/bin/sh
+
+if [ -f ~/.githooks/pre-commit-php ]; then
+    exec ~/.githooks/pre-commit-php
+fi
+
+if [ -f .git/hooks/pre-commit ]; then
+    exec .git/hooks/pre-commit
+fi
 ```
 
-Configure the Git [hooks path](https://git-scm.com/docs/git-config#Documentation/git-config.txt-corehooksPath):
-
-```sh
-git config --global core.hooksPath ~/.githooks
-```
+You'll thank me later ;)
 
 ## License
 
