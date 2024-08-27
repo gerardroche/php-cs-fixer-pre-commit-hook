@@ -17,13 +17,23 @@ git commit --no-verify
 
 ## Installation
 
+Run the installer.
+
+```sh
+./install
+```
+
+You'll thank me later ;)
+
+### Manual installation
+
 Create the hooks directory and set the [Git hooks path](https://git-scm.com/docs/git-config#Documentation/git-config.txt-corehooksPath).
 
 ```sh
 mkdir ~/.githooks && git config --global core.hooksPath ~/.githooks
 ```
 
-Download, copy, or symlink the `pre-commit` script to `~/.githooks/pre-commit-php` and ensure the file is executable.
+Download, copy, or symlink the `pre-commit` script to `~/.githooks/pre-commit-php` and ensure the file is executable. The installer symlinks the script into the githooks folder.
 
 ```sh
 chmod 744 ~/.githooks/pre-commit-php
@@ -42,8 +52,6 @@ if [ -f .git/hooks/pre-commit ]; then
     exec .git/hooks/pre-commit
 fi
 ```
-
-You'll thank me later ;)
 
 ## License
 
