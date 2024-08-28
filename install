@@ -49,6 +49,7 @@ if [ -f .git/hooks/pre-commit ]; then
     exec .git/hooks/pre-commit
 fi
 EOF
+    chmod 744 ~/.githooks/pre-commit
 fi
 
 echo "done!"
