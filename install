@@ -29,9 +29,13 @@ fi
 [ -d ~/.githooks ] || mkdir -p ~/.githooks
 
 git config --global core.hooksPath ~/.githooks
+echo "Git hooks path configured"
 
 if [ ! -f ~/.githooks/pre-commit-php ]; then
     ln -s "$PWD/pre-commit" ~/.githooks/pre-commit-php
+    echo "Symlinked ~/.githooks/pre-commit-php -> $PWD/pre-commit"
+else
+    echo "~/.githooks/pre-commit-php already exists"
 fi
 
 if [ ! -f ~/.githooks/pre-commit ]; then
@@ -50,6 +54,9 @@ if [ -f .git/hooks/pre-commit ]; then
 fi
 EOF
     chmod +x ~/.githooks/pre-commit
+    echo "Created ~/.githooks/pre-commit"
+else
+    echo "~/.githooks/pre-commit already exists"
 fi
 
-echo "done!"
+echo "Done!"
