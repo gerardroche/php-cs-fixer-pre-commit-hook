@@ -96,7 +96,6 @@ run_php_cs_fixer() {
     "$php_cs_fixer_bin" fix \
         --config="$config" \
         -q \
-        --dry-run \
         --stop-on-violation \
         --using-cache=no \
         ${extra_args} || rerun_with_violation_details
